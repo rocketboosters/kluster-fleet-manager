@@ -29,7 +29,7 @@ radon-cc:
   script:
   - pip install radon
   - radon cc .
-  - 'radon cc . -j | grep -Eq "\"rank\": \"(C|D|F)\"" && exit 1'
+  - 'radon cc . -j | grep -Eq "\"rank\": \"(C|D|F)\"" && exit 1 || exit 0'
 
 radon-mi:
   image: python:3.9
@@ -37,7 +37,7 @@ radon-mi:
   script:
   - pip install radon
   - radon mi .
-  - 'radon mi . -j | grep -Eq "\"rank\": \"(B|C|D|F)\"" && exit 1'
+  - 'radon mi . -j | grep -Eq "\"rank\": \"(B|C|D|F)\"" && exit 1 || exit 0'
 
 pydocstyle:
   image: python:3.9
@@ -61,14 +61,14 @@ hadolint:
     wget --quiet --output-document=./hadolint
     https://github.com/hadolint/hadolint/releases/download/v2.6.0/hadolint-Linux-x86_64
   - chmod +x ./hadolint
-  - hadolint Dockerfile
+  - ./hadolint Dockerfile
 
 pytest-py38:
   image: python:3.8
   stage: check
   script:
   - pip install poetry
-  - poetry install -E shell
+  - poetry install
   - >
     poetry run
     py.test
@@ -85,10 +85,10 @@ pytest-py38:
 pytest-py39:
   image: python:3.9
   stage: check
-  coverage: '/^TOTAL.*\s+\d+\s+\d+\s+(\d+)%/'
+  coverage: /^TOTAL.*\s+\d+\s+\d+\s+(\d+)%/
   script:
   - pip install poetry
-  - poetry install -E shell
+  - poetry install
   - >
     poetry run
     py.test

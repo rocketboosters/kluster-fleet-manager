@@ -90,9 +90,9 @@ spec:
         sector: coordinate
       serviceAccountName: kluster-fleet-manager
       volumes:
-        - name: application-config
-          configMap:
-            name: kluster-fleet-manager-config
+      - name: application-config
+        configMap:
+          name: kluster-fleet-manager-config
       containers:
       - name: manager
         imagePullPolicy: Always
@@ -100,8 +100,8 @@ spec:
         args: [--live]
         tty: true
         volumeMounts:
-          - mountPath: /application/config
-            name: application-config
+        - mountPath: /application/config
+          name: application-config
         resources:
           limits:
             memory: 500Mi
