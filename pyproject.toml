@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "kluster-fleet-manager"
+version = "0.3.0"
+description = "Yet another kluster fleet manager for EC2 fleet, batch processing spot auto-scaling node management."
+authors = ["Scott Ernst <swernst@gamil.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://gitlab.com/camberops/kluster-fleet-manager"
+repository = "https://gitlab.com/camberops/kluster-fleet-manager"
+documentation = "https://gitlab.com/camberops/kluster-fleet-manager"
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Typing :: Typed"
+]
+exclude = ["manager/tests"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+boto3 = "^1.18.1"
+kuber = "^1.16.0"
+
+[tool.poetry.dev-dependencies]
+pytest = ">=6.1.2"
+coverage = ">=5.3"
+black = { version = "*", allow-prereleases = true }
+pytest-cov = ">=2.10.1"
+flake8 = ">=3.8.4"
+flake8-black = ">=0.2.1"
+mypy = ">=0.910"
+taskipy = ">=1.4.0"
+lobotomy = "^0.3.5"
+pydocstyle = "^6.1.1"
+
+[tool.poetry.scripts]
+kluster_manager = "manager:main"
+
+[tool.taskipy.tasks]
+# https://github.com/illBeRoy/taskipy
+black = "black ."
+mypy = "poetry run mypy . --install-types --non-interactive --ignore-missing-imports"
+pydocstyle = "pydocstyle ."
+flake8 = "flake8 ."
+test = "pytest . --cov-report=term-missing --cov=."
+lint = "task black && task flake8 && task mypy && task pydocstyle"
+check = "task lint && task test"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

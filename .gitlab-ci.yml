@@ -1,0 +1,148 @@
+stages:
+- check
+- build
+
+black-lint:
+  image: python:3.9
+  stage: check
+  script:
+  - pip install black
+  - black --check .
+
+flake8-lint:
+  image: python:3.9
+  stage: check
+  script:
+  - pip install flake8 flake8-black
+  - flake8 .
+
+mypy-lint:
+  image: python:3.9
+  stage: check
+  script:
+  - pip install mypy
+  - mypy . --install-types --non-interactive --ignore-missing-imports
+
+radon-cc:
+  image: python:3.9
+  stage: check
+  script:
+  - pip install radon
+  - radon cc .
+  - 'radon cc . -j | grep -Eq "\"rank\": \"(C|D|F)\"" && exit 1'
+
+radon-mi:
+  image: python:3.9
+  stage: check
+  script:
+  - pip install radon
+  - radon mi .
+  - 'radon mi . -j | grep -Eq "\"rank\": \"(B|C|D|F)\"" && exit 1'
+
+pydocstyle:
+  image: python:3.9
+  stage: check
+  script:
+  - pip install pydocstyle
+  - pydocstyle .
+
+yamllint:
+  image: python:3.9
+  stage: check
+  script:
+  - pip install yamllint
+  - yamllint .
+
+hadolint:
+  image:python:3.9
+  stage: check
+  script:
+  - >
+    wget --quiet --output-document=./hadolint
+    https://github.com/hadolint/hadolint/releases/download/v2.6.0/hadolint-Linux-x86_64
+  - chmod +x ./hadolint
+  - hadolint Dockerfile
+
+pytest-py38:
+  image: python:3.8
+  stage: check
+  script:
+  - pip install poetry
+  - poetry install -E shell
+  - >
+    poetry run
+    py.test
+    --verbose
+    --cov-report term-missing
+    --cov=.
+    .
+  artifacts:
+    paths:
+    - .coverage
+    - coverage.xml
+    expire_in: 1 day
+
+pytest-py39:
+  image: python:3.9
+  stage: check
+  coverage: '/^TOTAL.*\s+\d+\s+\d+\s+(\d+)%/'
+  script:
+  - pip install poetry
+  - poetry install -E shell
+  - >
+    poetry run
+    py.test
+    --verbose
+    --cov-report term-missing
+    --cov-report xml
+    --cov=.
+    .
+  artifacts:
+    reports:
+      cobertura: coverage.xml
+    paths:
+    - .coverage
+    - coverage.xml
+    expire_in: 1 day
+
+version_reader:
+  image: python:3.9
+  stage: check
+  script:
+  - pip install poetry
+  - poetry version --short > version.txt
+  artifacts:
+    paths:
+    - version.txt
+    expire_in: 1 day
+
+docker-build:
+  stage: build
+  before_script:
+  - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD" docker.io
+  - docker info
+  script:
+  - export VERSION=$(cat version.txt)
+  - >
+    docker build --pull
+    -t "docker.io/rocketboosters/kluster-fleet-manager"
+    -t "docker.io/rocketboosters/kluster-fleet-manager-${VERSION}"
+    .
+  - docker push "docker.io/rocketboosters/kluster-fleet-manager"
+  - docker push "docker.io/rocketboosters/kluster-fleet-manager-${VERSION}"
+  only:
+  - main
+
+docker-build-branch:
+  stage: build
+  before_script:
+  - docker info
+  script:
+  - export VERSION=$(cat version.txt)
+  - >
+    docker build --pull
+    -t "docker.io/rocketboosters/kluster-fleet-manager"
+    -t "docker.io/rocketboosters/kluster-fleet-manager-${VERSION}"
+    .
+  except:
+  - main

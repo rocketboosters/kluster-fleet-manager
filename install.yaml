@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kluster-fleet-manager
+  namespace: kluster-fleet-manager
+  annotations: {}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kluster-fleet-manager
+  namespace: kluster-fleet-manager
+rules:
+- apiGroups: [""]
+  resources: [pods]
+  verbs: [get, watch, list]
+- apiGroups: [""]
+  resources: [nodes]
+  verbs: [get, watch, list, update, patch]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kluster-fleet-manager
+  namespace: kluster-fleet-manager
+subjects:
+- kind: ServiceAccount
+  name: kluster-fleet-manager
+  namespace: kluster-fleet-manager
+roleRef:
+  kind: ClusterRole
+  name: kluster-fleet-manager
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kluster-fleet-manager-config
+  namespace: kluster-fleet-manager
+  labels:
+    app: kluster-fleet-manager
+    sector: coordinate
+data:
+  config.yaml: |
+    sleep_interval: 20
+    default_over_subscription: 0.2
+    reserved_cpus: 1.0
+    reserved_memory: 2.5Gi
+    sectors:
+      coordinate:
+        kind: memory
+        fleets:
+        - size: small
+          min_capacity: 2
+      primary:
+        kind: memory
+        fleets:
+        - size: small
+          min_capacity: 0
+        - size: medium
+          min_capacity: 0
+        - size: large
+          min_capacity: 0
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kluster-fleet-manager
+  namespace: kluster-fleet-manager
+  labels:
+    app: kluster-fleet-manager
+    sector: coordinate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kluster-fleet-manager
+      sector: coordinate
+  template:
+    metadata:
+      labels:
+        app: kluster-fleet-manager
+        sector: coordinate
+    spec:
+      nodeSelector:
+        sector: coordinate
+      serviceAccountName: kluster-fleet-manager
+      volumes:
+        - name: application-config
+          configMap:
+            name: kluster-fleet-manager-config
+      containers:
+      - name: manager
+        imagePullPolicy: Always
+        image: rocketboosters/kluster-fleet-manager:latest
+        args: [--live]
+        tty: true
+        volumeMounts:
+          - mountPath: /application/config
+            name: application-config
+        resources:
+          limits:
+            memory: 500Mi
+            cpu: 500m
+          requests:
+            memory: 500Mi
+            cpu: 300m
