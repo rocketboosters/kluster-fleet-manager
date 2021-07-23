@@ -120,7 +120,7 @@ docker-build:
   image: docker
   stage: build
   services:
-    - docker:dind
+  - docker:dind
   before_script:
   - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD" docker.io
   - docker info
@@ -140,7 +140,7 @@ docker-build-branch:
   image: docker
   stage: build
   services:
-    - docker:dind
+  - docker:dind
   before_script:
   - docker info
   script:
