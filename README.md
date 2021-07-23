@@ -51,21 +51,23 @@ be uniquely identified by a combination of:
 
 For memory-optimized fleets, the available sizes and associated resources are:
 
-|  size  |  CPU  |  Memory  |
-| **xsmall** | 2 | 15.25Gi |
-| **small** | 4 | 30.5Gi |
-| **medium** | 8 | 61Gi |
-| **large** | 16 | 122Gi |
-| **xlarge** | 32 | 244Gi |
+|  size        |  CPU  |  Memory  |  Instance Options                                 |
+|--------------|-------|----------|---------------------------------------------------|
+|  **xsmall**  | 2     | 15.25Gi  | r5.large, r4.large, m5.xlarge, m4.xlarge          |
+| **small**    | 4     | 30.5Gi   | r5.xlarge, r4.xlarge, m5.2xlarge, m4.2xlarge      |
+| **medium**   | 8     | 61Gi     | r5.2xlarge, r4.2xlarge, m5.4xlarge, m4.4xlarge    |
+| **large**    | 16    | 122Gi    | r5.4xlarge, r4.4xlarge, m5.8xlarge, m4.10xlarge   |
+| **xlarge**   | 32    | 244Gi    | r5.8xlarge, r4.8xlarge, m5.16xlarge, m4.16xlarge  |
 
 For cpu-optimized fleets, the available sizes and associated resources are:
 
-|  size  |  CPU  |  Memory  |
-| **xsmall** | 4 | 7.5Gi |
-| **small** | 8 | 15Gi |
-| **medium** | 16 | 30Gi |
-| **large** | 36 | 60Gi |
-| **xlarge** | 64 | 144Gi |
+|  size        |  CPU  |  Memory  |  Instance Options                                 |
+|--------------|-------|----------|---------------------------------------------------|
+| **xsmall**   | 4     | 7.5Gi    | c5.xlarge, c4.xlarge, m5.xlarge, m4.xlarge        |
+| **small**    | 8     | 15Gi     | c5.2xlarge, c4.2xlarge, m5.2xlarge, m4.2xlarge    |
+| **medium**   | 16    | 30Gi     | c5.4xlarge, c4.4xlarge, m5.4xlarge, m4.4xlarge    |
+| **large**    | 36    | 60Gi     | c5.9xlarge, c4.8xlarge, m5.12xlarge, m4.10xlarge  |
+| **xlarge**   | 64    | 144Gi    | c5.18xlarge, m5.16xlarge, m4.16xlarge             |
 
 # Usage
 
