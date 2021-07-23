@@ -129,10 +129,10 @@ docker-build:
   - >
     docker build --pull
     -t "docker.io/rocketboosters/kluster-fleet-manager"
-    -t "docker.io/rocketboosters/kluster-fleet-manager-${VERSION}"
+    -t "docker.io/rocketboosters/kluster-fleet-manager:${VERSION}"
     .
   - docker push "docker.io/rocketboosters/kluster-fleet-manager"
-  - docker push "docker.io/rocketboosters/kluster-fleet-manager-${VERSION}"
+  - docker push "docker.io/rocketboosters/kluster-fleet-manager:${VERSION}"
   only:
   - main
 
@@ -148,7 +148,7 @@ docker-build-branch:
   - >
     docker build --pull
     -t "docker.io/rocketboosters/kluster-fleet-manager"
-    -t "docker.io/rocketboosters/kluster-fleet-manager-${VERSION}"
+    -t "docker.io/rocketboosters/kluster-fleet-manager:${VERSION}"
     .
   except:
   - main
