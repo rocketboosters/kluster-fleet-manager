@@ -66,9 +66,10 @@ def _compute_fleet_capacity(
     :return:
         Fractional number of nodes of capacity required for this fleet.
     """
-    pod_count = len(members)
+    capacities = [c for item, c in members.items() if item.needs_resources]
+    pod_count = len(capacities)
     nodes: typing.List[float] = [0.0 for _ in range(pod_count)]
-    for value in sorted(members.values(), reverse=True):
+    for value in sorted(capacities, reverse=True):
         index = next(i for i in range(pod_count) if (nodes[i] + value) <= 1)
         nodes[index] += value
     return max(fleet.capacity_min, sum([1 for b in nodes if b > 0]))
@@ -215,16 +216,24 @@ def _pack_into(
 def _create_fleet_allocation(
     fleet: "_types.FleetRequirements",
     members: typing.Dict["_types.CapacityItem", float],
-):
+) -> typing.Dict[str, typing.Any]:
     """
-    Display pod allocation to fleets for logging and debugging.
+    Create an allocation configuration for the given fleet and its capacity members.
 
     :param fleet:
         Requirements of the fleet to be echoed to the display.
     :param members:
         Capacity pod members for the specified fleet.
     """
-    raw = max(fleet.capacity_min, math.ceil(sum(members.values())))
+    pod_capacities = {
+        # Zero out resource allocations for pods that do not need resources. Pods that
+        # do not need resources are ones that should still linger on the node because
+        # of grace period settings, but are completed and do not need to utilize
+        # node resources while they linger.
+        item.pod_id: capacity if item.needs_resources else 0
+        for item, capacity in members.items()
+    }
+    raw = max(fleet.capacity_min, math.ceil(sum(pod_capacities.values())))
     computed = _compute_fleet_capacity(fleet, members)
     target = int(math.ceil(computed))
     return {
@@ -235,7 +244,7 @@ def _create_fleet_allocation(
             "computed": computed,
             "target": int(math.ceil(target)),
         },
-        "pod_capacities": {item.pod_id: capacity for item, capacity in members.items()},
+        "pod_capacities": pod_capacities,
     }
 
 
@@ -253,7 +262,9 @@ def get_capacity_targets(configs: "_types.ManagerConfigs") -> typing.Dict[str, d
 
     # Allocate pods into their ideal fleet and then repack smaller pods into
     # larger nodes where there is excess allocated capacity.
-    memberships = {f: allocate(f, capacities, nodes) for f in configs.fleets}
+    memberships: typing.Dict[
+        _types.FleetRequirements, typing.Dict[_types.CapacityItem, float]
+    ] = {f: allocate(f, capacities, nodes) for f in configs.fleets}
 
     for requirements, members in memberships.items():
         repack(requirements, members, memberships)

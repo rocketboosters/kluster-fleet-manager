@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "manager"
-version = "0.3.1"
+version = "0.4.0"
 description = "Yet another kluster fleet manager for EC2 fleet, batch processing spot auto-scaling node management."
 authors = ["Scott Ernst <swernst@gamil.com>"]
 license = "MIT"

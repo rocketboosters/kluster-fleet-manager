@@ -223,3 +223,15 @@ class CapacityItem:
     #: to be bounced because we want to avoid long-running deployments from
     #: clogging up excess node capacity.
     is_bouncable: bool = False
+
+    @property
+    def needs_resources(self) -> bool:
+        """
+        Get whether the pod needs resources based on its status phase.
+
+        Pods that have completed will be in either the Succeeded or Failed phase
+        and those pods no longer require resources.
+
+        https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+        """
+        return self.status.phase.lower() not in ("succeeded", "failed")
